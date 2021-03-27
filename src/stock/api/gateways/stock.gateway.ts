@@ -30,7 +30,7 @@ export class StockGateway implements OnGatewayConnection {
     try {
       const newStock = await this.stockService.updateStockPrice(stock);
       if (newStock) {
-        console.log('Stuff is happenig');
+        console.log('Stuff is happening');
         client.emit('stockPriceUpdated', newStock);
         this.server.emit('allStocks', await this.stockService.getStocks());
       }
@@ -38,8 +38,41 @@ export class StockGateway implements OnGatewayConnection {
       client.error(e.message);
     }
   }
+
+  @SubscribeMessage('addStock')
+  async handleAddStock(
+    @MessageBody() stock: Stock,
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    try {
+      const newStock = await this.stockService.addStock(stock);
+      if (newStock) {
+        this.server.emit('allStocks', await this.stockService.getStocks());
+      }
+    } catch (e) {
+      client.error(e.message);
+    }
+  }
+
+  @SubscribeMessage('deleteStock')
+  async handleDeleteStock(
+    @MessageBody() stock: Stock,
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    try {
+      await this.stockService.deleteStock(stock);
+      this.server.emit('allStocks', await this.stockService.getStocks());
+    } catch (e) {
+      client.error(e.message);
+    }
+  }
+
   async handleConnection(client: Socket, ...args: any[]): Promise<any> {
-    console.log('Client Connect', client.id);
-    client.emit('allStocks', await this.stockService.getStocks());
+    try {
+      console.log('Client Connect', client.id);
+      client.emit('allStocks', await this.stockService.getStocks());
+    } catch (e) {
+      client.error(e.message);
+    }
   }
 }
