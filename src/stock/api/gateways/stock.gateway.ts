@@ -22,16 +22,20 @@ export class StockGateway implements OnGatewayConnection {
     @Inject(IStockServiceProvider) private stockService: IStockService,
   ) {}
   @WebSocketServer() server;
-  @SubscribeMessage('updateStockPrice')
+  @SubscribeMessage('updateStock')
   async handleUpdateStockPrice(
     @MessageBody() stock: Stock,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    const newStock = await this.stockService.updateStockPrice(stock);
-    if (newStock) {
-      console.log('Stuff is happenig');
-      client.emit('stockPriceUpdated', newStock);
-      this.server.emit('allStocks', await this.stockService.getStocks());
+    try {
+      const newStock = await this.stockService.updateStockPrice(stock);
+      if (newStock) {
+        console.log('Stuff is happenig');
+        client.emit('stockPriceUpdated', newStock);
+        this.server.emit('allStocks', await this.stockService.getStocks());
+      }
+    } catch (e) {
+      client.error(e.message);
     }
   }
   async handleConnection(client: Socket, ...args: any[]): Promise<any> {
