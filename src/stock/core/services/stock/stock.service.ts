@@ -23,19 +23,19 @@ export class StockService implements IStockService {
   }
 
   async updateStockPrice(stock: Stock): Promise<Stock> {
-    const newStock = await this.stockRepository.findOne({ id: stock.id });
+    const newStock = await this.stockRepository.findOne({ name: stock.name });
     if (newStock) {
       newStock.price = stock.price;
       newStock.init_price = stock.init_price;
       newStock.desc = stock.desc;
-      await this.stockRepository.update(stock.id, newStock);
+      await this.stockRepository.update(stock.name, newStock);
       const updatedStock = await this.stockRepository.findOne({
-        id: newStock.id,
+        name: newStock.name,
       });
       if (updatedStock) {
         console.log(updatedStock.price);
         return {
-          id: updatedStock.id,
+          name: updatedStock.name,
           price: updatedStock.price,
           init_price: updatedStock.init_price,
           desc: updatedStock.desc,
@@ -49,16 +49,16 @@ export class StockService implements IStockService {
   }
 
   async addStock(stock: Stock): Promise<Stock> {
-    const stockDb = await this.stockRepository.findOne({ id: stock.id });
+    const stockDb = await this.stockRepository.findOne({ name: stock.name });
     if (!stockDb) {
       let newStock = this.stockRepository.create();
-      newStock.id = stock.id;
+      newStock.name = stock.name;
       newStock.price = stock.price;
       newStock.init_price = stock.init_price;
       newStock.desc = stock.desc;
       newStock = await this.stockRepository.save(newStock);
       return {
-        id: newStock.id,
+        name: newStock.name,
         price: newStock.price,
         init_price: newStock.init_price,
         desc: newStock.desc,
@@ -69,20 +69,20 @@ export class StockService implements IStockService {
   }
 
   async deleteStock(stock: Stock): Promise<void> {
-    const stockDb = await this.stockRepository.findOne({ id: stock.id });
+    const stockDb = await this.stockRepository.findOne({ name: stock.name });
 
     if (stockDb) {
-      await this.stockRepository.delete({ id: stock.id });
+      await this.stockRepository.delete({ name: stock.name });
     } else {
       throw new Error('This stock does not exists');
     }
   }
 
   async findStockById(id: string): Promise<Stock> {
-    const stockDb = await this.stockRepository.findOne({ id: id });
+    const stockDb = await this.stockRepository.findOne({ name: id });
     if (stockDb) {
       return {
-        id: stockDb.id,
+        name: stockDb.name,
         price: stockDb.price,
         init_price: stockDb.init_price,
         desc: stockDb.desc,

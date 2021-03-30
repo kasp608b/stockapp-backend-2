@@ -9,7 +9,7 @@ import {
 @Entity()
 export class StockEntity {
   @PrimaryColumn({ unique: true })
-  id: string;
+  name: string;
   @Column()
   price: number;
   @Column()

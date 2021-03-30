@@ -15,6 +15,7 @@ import {
   IStockService,
   IStockServiceProvider,
 } from '../../core/primary-ports/stock.service.interface';
+import { StockDTO } from '../dtos/stock.dto';
 //WHat
 @WebSocketGateway()
 export class StockGateway implements OnGatewayConnection {
@@ -24,15 +25,23 @@ export class StockGateway implements OnGatewayConnection {
   @WebSocketServer() server;
   @SubscribeMessage('updateStock')
   async handleUpdateStockPrice(
-    @MessageBody() stock: Stock,
+    @MessageBody() stockDTO: StockDTO,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     try {
+      const stock: Stock = {
+        name: stockDTO.name,
+        price: stockDTO.price,
+        init_price: stockDTO.init_price,
+        desc: stockDTO.desc,
+      };
       const newStock = await this.stockService.updateStockPrice(stock);
       if (newStock) {
         console.log('Stuff is happening');
         client.emit('stockPriceUpdated', newStock);
-        this.server.emit('allStocks', await this.stockService.getStocks());
+        const stocks = await this.stockService.getStocks();
+        const stockDTOs: StockDTO[] = JSON.parse(JSON.stringify(stocks));
+        this.server.emit('allStocks', stockDTOs);
       }
     } catch (e) {
       client.error(e.message);
@@ -41,13 +50,21 @@ export class StockGateway implements OnGatewayConnection {
 
   @SubscribeMessage('addStock')
   async handleAddStock(
-    @MessageBody() stock: Stock,
+    @MessageBody() stockDTO: Stock,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     try {
+      const stock: Stock = {
+        name: stockDTO.name,
+        price: stockDTO.price,
+        init_price: stockDTO.init_price,
+        desc: stockDTO.desc,
+      };
       const newStock = await this.stockService.addStock(stock);
       if (newStock) {
-        this.server.emit('allStocks', await this.stockService.getStocks());
+        const stocks = await this.stockService.getStocks();
+        const stockDTOs: StockDTO[] = JSON.parse(JSON.stringify(stocks));
+        this.server.emit('allStocks', stockDTOs);
       }
     } catch (e) {
       client.error(e.message);
@@ -56,12 +73,20 @@ export class StockGateway implements OnGatewayConnection {
 
   @SubscribeMessage('deleteStock')
   async handleDeleteStock(
-    @MessageBody() stock: Stock,
+    @MessageBody() stockDTO: Stock,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     try {
+      const stock: Stock = {
+        name: stockDTO.name,
+        price: stockDTO.price,
+        init_price: stockDTO.init_price,
+        desc: stockDTO.desc,
+      };
       await this.stockService.deleteStock(stock);
-      this.server.emit('allStocks', await this.stockService.getStocks());
+      const stocks = await this.stockService.getStocks();
+      const stockDTOs: StockDTO[] = JSON.parse(JSON.stringify(stocks));
+      this.server.emit('allStocks', stockDTOs);
     } catch (e) {
       client.error(e.message);
     }
@@ -70,7 +95,9 @@ export class StockGateway implements OnGatewayConnection {
   async handleConnection(client: Socket, ...args: any[]): Promise<any> {
     try {
       console.log('Client Connect', client.id);
-      client.emit('allStocks', await this.stockService.getStocks());
+      const stocks = await this.stockService.getStocks();
+      const stockDTOs: StockDTO[] = JSON.parse(JSON.stringify(stocks));
+      client.emit('allStocks', stockDTOs);
     } catch (e) {
       client.error(e.message);
     }
