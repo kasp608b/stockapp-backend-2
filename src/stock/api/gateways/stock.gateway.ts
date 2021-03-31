@@ -16,6 +16,7 @@ import {
   IStockServiceProvider,
 } from '../../core/primary-ports/stock.service.interface';
 import { StockDTO } from '../dtos/stock.dto';
+
 //WHat
 @WebSocketGateway()
 export class StockGateway implements OnGatewayConnection {
