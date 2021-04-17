@@ -17,7 +17,6 @@ import { DatabaseModule } from './stock/infrastructure/data-source/postgres/data
         PORT: Joi.number(),
       }),
     }),
-    DatabaseModule,
   ],
   controllers: [],
   providers: [],
